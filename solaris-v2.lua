@@ -29,12 +29,25 @@ end
 
 
 
-local NotificationFrame = game:GetObjects("rbxassetid://6924028278")[1]
-NotificationFrame.ZIndex = 4
-NotificationFrame.Parent = NotificationHolder
-script = NotificationFrame.NotifScript
-local Notify = loadstring(NotificationFrame.NotifScript.Source)()
-script = oldScript
+-- Create a custom native notification handler since the online asset is 403 Forbidden
+local Notify = {}
+function Notify:New(title, desc)
+    -- Fallback to the executor's native notification system if available
+    if tf and tf.notification then
+        tf.notification({Title = title, Text = desc, Duration = 5})
+    elseif StarterGui then
+        -- Default back to standard Roblox core notifications
+        pcall(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = title;
+                Text = desc;
+                Duration = 5;
+            })
+        end)
+    else
+        print("[Solaris Notification] " .. tostring(title) .. ": " .. tostring(desc))
+    end
+end
 
 local SolarisLib = {
     Themes = {
@@ -1292,4 +1305,3 @@ function SolarisLib:New(Config)
     end 
     return TabHolder
 end    
-return SolarisLib
